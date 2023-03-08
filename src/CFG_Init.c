@@ -265,11 +265,11 @@ void get_set_para(set_param_t *set_param)
 		printf("sample_interval:%d\r\n",set_param->sample_interval );
 	}
 
-	json_tmp = cJSON_GetObjectItem( cjson_config,"sample_interval");
+	json_tmp = cJSON_GetObjectItem( cjson_config,"report_interval");
 	if(json_tmp != NULL && json_tmp->type  != cJSON_NULL)
 	{
-		set_param->sample_interval=json_tmp->valueint;
-		printf("sample_interval:%d\r\n",set_param->sample_interval );
+		set_param->report_interval=json_tmp->valueint;
+		printf("report_interval:%d\r\n",set_param->report_interval );
 	}
 
 	json_tmp = cJSON_GetObjectItem( cjson_config,"sleep_time");
@@ -343,7 +343,7 @@ void set_set_param(set_param_t *set_param)
 
 	file_write("set.txt", json_data, strlen(json_data));
 	printf("%s\r\n",json_data);//输出字符串
-	
+
 	cJSON_free(json_data);
 	cJSON_Delete(cjson_set);//清除结构体
 }
