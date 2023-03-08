@@ -1,10 +1,11 @@
 /*
  * CFG_Init.c
  *
- *  Created on: Feb 7, 2023
+ *  Created on: Mar 8, 2023
  *      Author: LWJ
  */
 #include "CFG_Init.h"
+#include "file_port.h"
 
 module_config_t module_config_buf[40];
 set_param_t module_set_para;
@@ -20,20 +21,8 @@ char json_string_set_read[2048];
  */
 void get_module_config(module_config_t *module_config)
 {
-	memset(json_string_cfg_read, 0x00, 8192);
-
-	//封装起来
- 	int fd1 = open("config.txt", O_RDWR|O_CREAT, 0664);
-	if(fd1==-1)
-	{
-		printf("open file fail\n\r");
-	}
-	else
-	{
-		printf("open file succeed\n\r");
-	}
-	read(fd1, json_string_cfg_read, sizeof(json_string_cfg_read));
-	close(fd1);
+	memset(json_string_cfg_read, 0x00, sizeof(json_string_cfg_read));
+	file_read("config.txt", json_string_cfg_read, sizeof(json_string_cfg_read));
 
 	cJSON* cjson_config = cJSON_Parse(json_string_cfg_read);
 	if(cjson_config == NULL)
@@ -116,7 +105,7 @@ void get_module_config(module_config_t *module_config)
         {
         	memset(module_config[ii].device_sn , 0x00, 32);
             memcpy( module_config[ii].device_sn, json_tmp->valuestring, strlen(json_tmp->valuestring));
-            printf("%s \r ", module_config[ii].device_sn);
+            printf("%s  ", module_config[ii].device_sn);
         }
 
         json_tmp = cJSON_GetObjectItem(MODULE_item ,"device_type");
@@ -162,8 +151,9 @@ void  set_module_config(module_config_t *module_config)
 
 	char *json_data = cJSON_Print(cjson_config);	//JSON数据结构转换为JSON字符串
 
-	// lfs_write("cfgFileTEST", json_data, strlen(json_data));
+	file_write("config.txt", json_data, strlen(json_data));
 	printf("%s\r\n",json_data);//输出字符串
+
 	cJSON_free(json_data);
 	cJSON_Delete(cjson_config);//清除结构体
 }
@@ -175,21 +165,9 @@ void  set_module_config(module_config_t *module_config)
  */
 void get_set_para(set_param_t *set_param)
 {
-	memset(json_string_set_read, 0x00, 2048);
-
-	//封装起来
-	int fd2 = open("set.txt", O_RDWR|O_CREAT, 0664);
-	if(fd2==-1)
-	{
-		printf("open file fail\n\r");
-	}
-	else
-	{
-		printf("open file succeed\n\r");
-	}
-	read(fd2, json_string_set_read, sizeof(json_string_set_read));
-	close(fd2);
-
+	memset(json_string_set_read, 0x00, sizeof(json_string_set_read));
+	file_read("set.txt", json_string_set_read, sizeof(json_string_set_read));
+	
 	cJSON* cjson_config = cJSON_Parse(json_string_set_read);
 	if(cjson_config == NULL)
 	{
@@ -362,9 +340,10 @@ void set_set_param(set_param_t *set_param)
 	cJSON_AddNumberToObject(cjson_set, "ip_port", set_param->ip_port);
 
 	char *json_data = cJSON_Print(cjson_set);	//JSON数据结构转换为JSON字符串
-	// lfs_write("setFileTEST", json_data, strlen(json_data));
 
+	file_write("set.txt", json_data, strlen(json_data));
 	printf("%s\r\n",json_data);//输出字符串
+	
 	cJSON_free(json_data);
 	cJSON_Delete(cjson_set);//清除结构体
 }
