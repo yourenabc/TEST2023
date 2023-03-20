@@ -2,7 +2,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10.2)
 
 # 指定工程的名称
-PROJECT(file)
+PROJECT(modbuTest)
 
 # 将源文件赋值给 SRC_LIST 变量，也可以指定多个源文件，用空格隔开
 # SET(SRC_LIST xx1.cpp xx2.cpp xx3.cpp)
@@ -22,7 +22,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/inc)
 # LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib)
 
 #生成可执行文件
-ADD_EXECUTABLE(file ${SRC_LIST})
+ADD_EXECUTABLE(modbus ${SRC_LIST})
 
 #添加共享库链接
 # TARGET_LINK_LIBRARIES(firmwareupgrade ${LINK_LIBS})
