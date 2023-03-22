@@ -34,15 +34,15 @@
 
 
 int rs485_1_Init(void);
-void timerTestInit(void);
-int check_data_type (int check);
 
 extern int get_AI(uint8_t*);
 extern int get_DI(uint8_t*);
 extern int get_DO(uint8_t*);
 extern int get_rs485_1(uint16_t *data);
 extern int get_rs485_2(uint16_t *data);
-
 extern int GetNowTime(char *);
 
+int check_data_type (int check);
+int check_addr_consecutive (int check);
+void timerTestInit(void);
 #endif

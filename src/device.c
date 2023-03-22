@@ -21,14 +21,15 @@
 
 struct itimerval new_timer;
 
-uint16_t rs485_1_Databuf[128];
+uint16_t rs485_1_Databuf[256];
+uint16_t rs485_2_Databuf[256];
 extern modbus_t *ctx;
 
 
 int rs485_1_Init(void)
 {
     //打开端口: 端口，波特率，校验位，数据位，停止位
-    ctx = modbus_new_rtu("/dev/ttyUSB0", 9600, 'N', 8, 1);
+    ctx = modbus_new_rtu("/dev/ttyUSB1", 9600, 'N', 8, 1);
     //设置从机地址
     modbus_set_slave(ctx, 1);
     //设置串口模式(可选)
@@ -263,7 +264,103 @@ int get_rs485_1(uint16_t *data)
 
 int get_rs485_2(uint16_t *data)
 {
-    //TODO
+    int ii = 0;
+    int rc = 0;
+    int single_num = 0;//单独地址读取的个数
+    int consecutive_sum = 0;//连续地址读取的个数
+    int consecutive_addr_begin = 0;
+    int data_offset = 0;
+
+    for(ii = 0; ii<module_config_buf_len; ii++)
+    {
+        if(module_config_buf[ii].enabled_flag == enable && module_config_buf[ii].channel == CHANNEL_RS485_2)//当前是否使能且为RS4851
+        {
+            if((module_config_buf[ii+1].enabled_flag == enable) && (module_config_buf[ii+1].channel == CHANNEL_RS485_2))  //下一个是否使能且为RS4851
+            {
+                if(module_config_buf[ii].slave_addr == module_config_buf[ii+1].slave_addr)
+                {
+                    if(check_addr_consecutive(ii))//计算地址是否连续
+                    {
+                        if(consecutive_sum == 0)//记录下首地址
+                        {
+                            consecutive_addr_begin = module_config_buf[ii].data_addr;
+                        }
+                        single_num = check_data_type(module_config_buf[ii].data_type);
+                        consecutive_sum = consecutive_sum + single_num;
+                        printf("RECORD\r\n");
+                    }
+                    else
+                    {
+                        if(consecutive_sum == 0)//如果跟下一个不连续且第一次进来 直接输出
+                        {
+                            single_num = check_data_type(module_config_buf[ii].data_type);
+                            modbus_set_slave(ctx, module_config_buf[ii].slave_addr);
+                            rc = modbus_read_registers(ctx, module_config_buf[ii].data_addr, single_num, &data[data_offset]);
+                            data_offset = data_offset + single_num;
+                            printf("SINGLE \r\n");
+                        }
+                        else
+                        {
+                            single_num = check_data_type(module_config_buf[ii].data_type);
+                            consecutive_sum = consecutive_sum + single_num;
+                            modbus_set_slave(ctx, module_config_buf[ii].slave_addr);
+                            rc = modbus_read_registers(ctx, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
+                            data_offset = data_offset + consecutive_sum;
+                            consecutive_sum = 0;
+                            printf("consecutive 1\r\n");
+                        }
+                    }
+                }
+                else
+                {
+                    if(consecutive_sum == 0)
+                    {
+                        single_num = check_data_type(module_config_buf[ii].data_type);
+                        modbus_set_slave(ctx, module_config_buf[ii].slave_addr);
+                        rc = modbus_read_registers(ctx, module_config_buf[ii].data_addr, single_num, &data[data_offset]);
+                        data_offset = data_offset + single_num;
+                        printf("SALVE ADDR CHANGE\r\n");
+                    }
+                    else
+                    {
+                        single_num = check_data_type(module_config_buf[ii].data_type);
+                        consecutive_sum = consecutive_sum + single_num;
+                        modbus_set_slave(ctx, module_config_buf[ii].slave_addr);
+                        rc = modbus_read_registers(ctx, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
+                        data_offset = data_offset + consecutive_sum;
+                        consecutive_sum = 0;
+                        printf("consecutive 3\r\n");  
+                    }
+                }
+            }
+            else
+            {
+                if(consecutive_sum == 0)
+                {
+                    single_num = check_data_type(module_config_buf[ii].data_type);
+                    modbus_set_slave(ctx, module_config_buf[ii].slave_addr);
+                    rc = modbus_read_registers(ctx, module_config_buf[ii].data_addr, single_num, &data[data_offset]);
+                    data_offset = data_offset + single_num;
+                    printf("ABC\r\n");
+                }
+                else
+                {
+                    single_num = check_data_type(module_config_buf[ii].data_type);
+                    consecutive_sum = consecutive_sum + single_num;
+                    modbus_set_slave(ctx, module_config_buf[ii].slave_addr);
+                    rc = modbus_read_registers(ctx, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
+                    data_offset = data_offset + consecutive_sum;
+                    consecutive_sum = 0;
+                    printf("consecutive 2\r\n");
+                }
+            }
+        }
+    }
+
+    if (rc == -1) 
+    {
+        fprintf(stderr, "Connexion failed: %s\n", "read");
+    }
     return 0;
 }
 
