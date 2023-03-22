@@ -7,7 +7,8 @@
 #include "CFG_Init.h"
 #include "file_port.h"
 
-module_config_t module_config_buf[40];
+
+module_config_t module_config_buf[module_config_buf_len];
 set_param_t module_set_para;
 int module_config_num_g = 0;//实例接口的数量
 

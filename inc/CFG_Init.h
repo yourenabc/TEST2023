@@ -52,6 +52,8 @@ typedef struct
 		uint16_t ip_port;            //ip端口
 }set_param_t;
 
+#define module_config_buf_len 50
+
 extern module_config_t module_config_buf[];
 extern set_param_t module_set_para;
 
