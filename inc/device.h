@@ -44,5 +44,6 @@ extern int GetNowTime(char *);
 
 int check_data_type (int check);
 int check_addr_consecutive (int check);
+int send_modbus_cmd (int funcode, int addr, int nb, uint16_t *dest);
 void timerTestInit(void);
 #endif

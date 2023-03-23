@@ -1101,7 +1101,7 @@ int modbus_read_bits(modbus_t *ctx, int addr, int nb, uint8_t *dest)
 
 
 /* Same as modbus_read_bits but reads the remote device input table */
-int modbus_read_input_bits(modbus_t *ctx, int addr, int nb, uint8_t *dest)
+int modbus_read_input_bits(modbus_t *ctx, int addr, int nb, uint8_t *dest)//0
 {
     int rc;
 
@@ -1176,7 +1176,7 @@ static int read_registers(modbus_t *ctx, int function, int addr, int nb,
 
 /* Reads the holding registers of remote device and put the data into an
    array */
-int modbus_read_registers(modbus_t *ctx, int addr, int nb, uint16_t *dest)
+int modbus_read_registers(modbus_t *ctx, int addr, int nb, uint16_t *dest)//0x03 
 {
     int status;
 
@@ -1202,7 +1202,7 @@ int modbus_read_registers(modbus_t *ctx, int addr, int nb, uint16_t *dest)
 
 /* Reads the input registers of remote device and put the data into an array */
 int modbus_read_input_registers(modbus_t *ctx, int addr, int nb,
-                                uint16_t *dest)
+                                uint16_t *dest)//0x04
 {
     int status;
 
