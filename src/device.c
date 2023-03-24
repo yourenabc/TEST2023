@@ -9,9 +9,7 @@
  *
  */
 #include "device.h"
-
 #include "CFG_Init.h"
-
 #include "string.h"
 #include <stdlib.h>
 #include "stdio.h"
@@ -310,12 +308,6 @@ int get_rs485_1(uint16_t *data)
             }
         }
     }
-
-    // if (rc == -1) 
-    // {
-    //     fprintf(stderr, "Connexion failed: %s\n", "no ");
-    // }
-
     return 0;
 }
 
@@ -413,12 +405,6 @@ int get_rs485_2(uint16_t *data)
             }
         }
     }
-
-    // if (rc == -1) 
-    // {
-    //     fprintf(stderr, "Connexion failed: %s\n", "no ");
-    // }
-
     return 0;
 }
 
@@ -460,7 +446,7 @@ void *RS485_1_TASK_entry(void *param)
                 printf("<%#x>", rs485_1_Databuf[i]);
             }
             printf("\n");
-            printf("rs485_1 done \n");
+            printf("rs485_1 print done \n");
         }
     }
  }
@@ -483,7 +469,7 @@ void *RS485_2_TASK_entry(void *param)
             }
             printf("\n");
 
-            printf("rs485_2 done \n");
+            printf("rs485_2 print done \n");
         }
     }
  }
