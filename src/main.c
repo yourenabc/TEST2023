@@ -1,3 +1,11 @@
+/*
+ * @Author: laoweijie laoweijie@cyg.com
+ * @Date: 2023-03-20 13:10:10
+ * @LastEditors: laoweijie laoweijie@cyg.com
+ * @LastEditTime: 2023-03-24 10:24:41
+ * @FilePath: /modbusTest/src/main.c
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AEs
+ */
 #include "cJSON.h"
 #include "CFG_Init.h"
 #include "modbus.h"
@@ -23,7 +31,10 @@ int main()
 
     get_module_config(module_config_buf);
     rs485_1_Init();
+    rs485_2_Init();
     timerTestInit();
+    RS485_1_TASK_Init();
+    RS485_2_TASK_Init();
 
 	while(1)
     {

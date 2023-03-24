@@ -12,8 +12,12 @@ PROJECT(modbuTest)
 # AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/src SRC_LIST)
 FILE(GLOB SRC_LIST "${PROJECT_SOURCE_DIR}/src/*.c")
 
+
+
 # 动态库文件
 # SET(LINK_LIBS libmodbus.so)
+set(CMAKE_CXX_FLAGS "${CAMKE_CXX_FLAGS} -std=c++11")
+FIND_PACKAGE(Threads)
 
 #指定头文件目录位置
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/inc)
@@ -26,7 +30,7 @@ ADD_EXECUTABLE(modbus ${SRC_LIST})
 
 #添加共享库链接
 # TARGET_LINK_LIBRARIES(firmwareupgrade ${LINK_LIBS})
-
+TARGET_LINK_LIBRARIES(modbus ${CMAKE_THREAD_LIBS_INIT})
 #cd build
 #cmake .
 #make

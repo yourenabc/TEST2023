@@ -1,3 +1,11 @@
+/*
+ * @Author: laoweijie laoweijie@cyg.com
+ * @Date: 2023-03-21 13:39:01
+ * @LastEditors: laoweijie laoweijie@cyg.com
+ * @LastEditTime: 2023-03-24 09:34:21
+ * @FilePath: /modbusTest/inc/device.h
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE;
+ */
 /**
  * @file device.h
  * @author your name (you@domain.com)
@@ -13,6 +21,8 @@
 
 #include "stdint.h"
 #include <stdio.h>
+#include "modbus.h"
+#include <pthread.h>
 
 #define enable  1
 #define disable 0
@@ -34,6 +44,7 @@
 
 
 int rs485_1_Init(void);
+int rs485_2_Init(void);
 
 extern int get_AI(uint8_t*);
 extern int get_DI(uint8_t*);
@@ -44,6 +55,11 @@ extern int GetNowTime(char *);
 
 int check_data_type (int check);
 int check_addr_consecutive (int check);
-int send_modbus_cmd (int funcode, int addr, int nb, uint16_t *dest);
+int send_modbus_cmd (int funcode, modbus_t *ctx, int addr, int nb, uint16_t *dest);
+void sig_handler(int signal);
 void timerTestInit(void);
+void *RS485_1_TASK_entry(void *param);
+void *RS485_2_TASK_entry(void *param);
+void RS485_1_TASK_Init(void);
+void RS485_2_TASK_Init(void);
 #endif
