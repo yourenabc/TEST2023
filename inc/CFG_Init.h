@@ -1,4 +1,12 @@
 /*
+ * @Author: laoweijie laoweijie@cyg.com
+ * @Date: 2023-03-20 13:10:09
+ * @LastEditors: laoweijie laoweijie@cyg.com
+ * @LastEditTime: 2023-03-24 14:55:08
+ * @FilePath: /modbusTest/inc/CFG_Init.h
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
+/*
  * CFG_Init.h
  *
  *  Created on: Mar 8, 2023
@@ -54,7 +62,7 @@ typedef struct
 
 #define module_config_buf_len 50
 
-extern module_config_t module_config_buf[];
+extern module_config_t g_module_config[];
 extern set_param_t module_set_para;
 
 void get_module_config(module_config_t *module_config);

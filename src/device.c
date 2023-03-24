@@ -21,11 +21,16 @@
 
 struct itimerval new_timer;
 
+pthread_t rs485_1_task;
+pthread_t rs485_2_task;
+
 uint16_t rs485_1_Databuf[256];
 uint16_t rs485_2_Databuf[256];
 modbus_t *ctx_rs485_1 = NULL;
 modbus_t *ctx_rs485_2 = NULL;
 
+int RS485_1_ENABLE_FLAG = 1;
+int RS485_2_ENABLE_FLAG = 1;
 
 int rs485_1_Init(void)
 {
@@ -37,8 +42,9 @@ int rs485_1_Init(void)
     modbus_rtu_set_serial_mode(ctx_rs485_1, MODBUS_RTU_RS485);
     //建立连接
     if (modbus_connect(ctx_rs485_1) == -1) {
-        fprintf(stderr, "Connexion failed: %s\n", "conncet");
+        fprintf(stderr, "Connexion failed: %s\n", "conncet 4851");
         modbus_free(ctx_rs485_1);
+        RS485_1_ENABLE_FLAG = 0;
         return -1;
     }
 }
@@ -53,8 +59,9 @@ int rs485_2_Init(void)
     modbus_rtu_set_serial_mode(ctx_rs485_2, MODBUS_RTU_RS485);
     //建立连接
     if (modbus_connect(ctx_rs485_2) == -1) {
-        fprintf(stderr, "Connexion failed: %s\n", "conncet");
+        fprintf(stderr, "Connexion failed: %s\n", "conncet 4852");
         modbus_free(ctx_rs485_2);
+        RS485_2_ENABLE_FLAG = 0;
         return -1;
     }
 }
@@ -67,15 +74,15 @@ int rs485_2_Init(void)
  */
 int get_AI(uint8_t *AI)
 {
-    // memset(AI, 0, sizeof(AI));
+    memset(AI, 0, sizeof(AI));
 
-    // for (int i = 0; i < 256; i++)
-    // {
-    //     srand((unsigned)time(NULL));
-    //     uint8_t p = rand() % 999 - 100;
-    //     *AI = p;
-    //     AI++;
-    // }
+    for (int i = 0; i < 256; i++)
+    {
+        srand((unsigned)time(NULL));
+        uint8_t p = rand() % 999 - 100;
+        *AI = p;
+        AI++;
+    }
 }
 
 /**
@@ -86,16 +93,16 @@ int get_AI(uint8_t *AI)
  */
 int get_DI(uint8_t *DI)
 {
-    // memset(DI, 0, sizeof(DI));
+    memset(DI, 0, sizeof(DI));
 
-    // for (int i = 0; i < 256; i++)
-    // {
-    //     if (i % 2)
-    //         *DI = 1;
-    //     else
-    //         *DI = 0;
-    //     DI++;
-    // }
+    for (int i = 0; i < 256; i++)
+    {
+        if (i % 2)
+            *DI = 1;
+        else
+            *DI = 0;
+        DI++;
+    }
 }
 
 /**
@@ -106,16 +113,16 @@ int get_DI(uint8_t *DI)
  */
 int get_DO(uint8_t *DO)
 {
-    // memset(DO, 0, sizeof(DO));
+    memset(DO, 0, sizeof(DO));
 
-    // for (int i = 0; i < 256; i++)
-    // {
-    //     if (i % 2)
-    //         *DO = 1;
-    //     else
-    //         *DO = 0;
-    //     DO++;
-    // }
+    for (int i = 0; i < 256; i++)
+    {
+        if (i % 2)
+            *DO = 1;
+        else
+            *DO = 0;
+        DO++;
+    }
 }
 
 /**
@@ -126,15 +133,15 @@ int get_DO(uint8_t *DO)
  */
 int GetNowTime(char *timestr)
 {
-    // time_t nSeconds;
-    // struct tm *pTM;
+    time_t nSeconds;
+    struct tm *pTM;
 
-    // time(&nSeconds); // 同 nSeconds = time(NULL);
-    // pTM = localtime(&nSeconds);
+    time(&nSeconds); // 同 nSeconds = time(NULL);
+    pTM = localtime(&nSeconds);
 
-    // /* 系统日期和时间,格式: yyyymmddHHMMSS */
-    // sprintf(timestr, "%04d-%02d-%02d %02d:%02d:%02d", pTM->tm_year + 1900, pTM->tm_mon + 1,
-    //         pTM->tm_mday, pTM->tm_hour, pTM->tm_min, pTM->tm_sec);
+    /* 系统日期和时间,格式: yyyymmddHHMMSS */
+    sprintf(timestr, "%04d-%02d-%02d %02d:%02d:%02d", pTM->tm_year + 1900, pTM->tm_mon + 1,
+            pTM->tm_mday, pTM->tm_hour, pTM->tm_min, pTM->tm_sec);
 }
 
 int check_data_type (int check)//查看数据类型 是几个字节的数据
@@ -167,10 +174,10 @@ int check_data_type (int check)//查看数据类型 是几个字节的数据
 int check_addr_consecutive (int check)//查看是否连续
 {
     int len =0;
-    len = check_data_type(module_config_buf[check].data_type);
-    if(((module_config_buf[check].data_addr + len) == module_config_buf[check+1].data_addr) && (module_config_buf[check].storage_type == module_config_buf[check+1].storage_type))
+    len = check_data_type(g_module_config[check].data_type);
+    if(((g_module_config[check].data_addr + len) == g_module_config[check+1].data_addr) && (g_module_config[check].storage_type == g_module_config[check+1].storage_type))
     {
-        if(module_config_buf[check].storage_type == 2 || module_config_buf[check].storage_type == 1)//遥信量就不要连续去读了 modbus_read_bits()  modbus_read_input_bits() 
+        if(g_module_config[check].storage_type == 2 || g_module_config[check].storage_type == 1)//遥信量就不要连续去读了 modbus_read_bits()  modbus_read_input_bits() 
         {
             return 0;
         }
@@ -184,11 +191,11 @@ int send_modbus_cmd (int funcode, modbus_t *ctx, int addr, int nb, uint16_t *des
     int result = 0;
     if(funcode == 1)
     {
-        result = modbus_read_bits(ctx, addr, nb, dest);
+        result = modbus_read_bits(ctx, addr, nb, (uint8_t*)dest);
     }
     else if(funcode == 2)
     {
-        result = modbus_read_input_bits(ctx, addr, nb, dest);
+        result = modbus_read_input_bits(ctx, addr, nb, (uint8_t*)dest);
     }
     else if(funcode == 3)
     {
@@ -225,19 +232,19 @@ int get_rs485_1(uint16_t *data)
 
     for(ii = 0; ii<module_config_buf_len; ii++)
     {
-        if(module_config_buf[ii].enabled_flag == enable && module_config_buf[ii].channel == CHANNEL_RS485_1 && module_config_buf[ii].module_type < 512)//当前是否使能且为RS4851
+        if(g_module_config[ii].enabled_flag == enable && g_module_config[ii].channel == CHANNEL_RS485_1 && g_module_config[ii].module_type < 512)//当前是否使能且为RS4851
         {
-            if((module_config_buf[ii+1].enabled_flag == enable) && (module_config_buf[ii+1].channel == CHANNEL_RS485_1))  //下一个是否使能且为RS4851
+            if((g_module_config[ii+1].enabled_flag == enable) && (g_module_config[ii+1].channel == CHANNEL_RS485_1))  //下一个是否使能且为RS4851
             {
-                if(module_config_buf[ii].slave_addr == module_config_buf[ii+1].slave_addr)
+                if(g_module_config[ii].slave_addr == g_module_config[ii+1].slave_addr)
                 {
                     if(check_addr_consecutive(ii))//计算地址是否连续
                     {
                         if(consecutive_sum == 0)//记录下首地址
                         {
-                            consecutive_addr_begin = module_config_buf[ii].data_addr;
+                            consecutive_addr_begin = g_module_config[ii].data_addr;
                         }
-                        single_num = check_data_type(module_config_buf[ii].data_type);
+                        single_num = check_data_type(g_module_config[ii].data_type);
                         consecutive_sum = consecutive_sum + single_num;
                         printf("485_1 RECORD\r\n");
                     }
@@ -245,18 +252,18 @@ int get_rs485_1(uint16_t *data)
                     {
                         if(consecutive_sum == 0)//如果跟下一个不连续且第一次进来 直接输出
                         {
-                            single_num = check_data_type(module_config_buf[ii].data_type);
-                            modbus_set_slave(ctx_rs485_1, module_config_buf[ii].slave_addr);
-                            rc = send_modbus_cmd(module_config_buf[ii].storage_type, ctx_rs485_1, module_config_buf[ii].data_addr, single_num, &data[data_offset]);
+                            single_num = check_data_type(g_module_config[ii].data_type);
+                            modbus_set_slave(ctx_rs485_1, g_module_config[ii].slave_addr);
+                            rc = send_modbus_cmd(g_module_config[ii].storage_type, ctx_rs485_1, g_module_config[ii].data_addr, single_num, &data[data_offset]);
                             data_offset = data_offset + single_num;
                             printf("485_1 SINGLE\r\n");
                         }
                         else
                         {
-                            single_num = check_data_type(module_config_buf[ii].data_type);
+                            single_num = check_data_type(g_module_config[ii].data_type);
                             consecutive_sum = consecutive_sum + single_num;
-                            modbus_set_slave(ctx_rs485_1, module_config_buf[ii].slave_addr);
-                            rc = send_modbus_cmd(module_config_buf[ii].storage_type, ctx_rs485_1, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
+                            modbus_set_slave(ctx_rs485_1, g_module_config[ii].slave_addr);
+                            rc = send_modbus_cmd(g_module_config[ii].storage_type, ctx_rs485_1, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
                             data_offset = data_offset + consecutive_sum;
                             consecutive_sum = 0;
                             printf("485_1 consecutive 1\r\n");
@@ -267,18 +274,18 @@ int get_rs485_1(uint16_t *data)
                 {
                     if(consecutive_sum == 0)
                     {
-                        single_num = check_data_type(module_config_buf[ii].data_type);
-                        modbus_set_slave(ctx_rs485_1, module_config_buf[ii].slave_addr);
-                        rc = send_modbus_cmd(module_config_buf[ii].storage_type, ctx_rs485_1, module_config_buf[ii].data_addr, single_num, &data[data_offset]);
+                        single_num = check_data_type(g_module_config[ii].data_type);
+                        modbus_set_slave(ctx_rs485_1, g_module_config[ii].slave_addr);
+                        rc = send_modbus_cmd(g_module_config[ii].storage_type, ctx_rs485_1, g_module_config[ii].data_addr, single_num, &data[data_offset]);
                         data_offset = data_offset + single_num;
                         printf("485_1 SALVE ADDR CHANGE\r\n");
                     }
                     else
                     {
-                        single_num = check_data_type(module_config_buf[ii].data_type);
+                        single_num = check_data_type(g_module_config[ii].data_type);
                         consecutive_sum = consecutive_sum + single_num;
-                        modbus_set_slave(ctx_rs485_1, module_config_buf[ii].slave_addr);
-                        rc = send_modbus_cmd(module_config_buf[ii].storage_type, ctx_rs485_1, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
+                        modbus_set_slave(ctx_rs485_1, g_module_config[ii].slave_addr);
+                        rc = send_modbus_cmd(g_module_config[ii].storage_type, ctx_rs485_1, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
                         data_offset = data_offset + consecutive_sum;
                         consecutive_sum = 0;
                         printf("485_1 consecutive 3\r\n");  
@@ -289,18 +296,18 @@ int get_rs485_1(uint16_t *data)
             {
                 if(consecutive_sum == 0)
                 {
-                    single_num = check_data_type(module_config_buf[ii].data_type);
-                    modbus_set_slave(ctx_rs485_1, module_config_buf[ii].slave_addr);
-                    rc = send_modbus_cmd(module_config_buf[ii].storage_type, ctx_rs485_1, module_config_buf[ii].data_addr, single_num, &data[data_offset]);
+                    single_num = check_data_type(g_module_config[ii].data_type);
+                    modbus_set_slave(ctx_rs485_1, g_module_config[ii].slave_addr);
+                    rc = send_modbus_cmd(g_module_config[ii].storage_type, ctx_rs485_1, g_module_config[ii].data_addr, single_num, &data[data_offset]);
                     data_offset = data_offset + single_num;
                     printf("485_1 ABC\r\n");
                 }
                 else
                 {
-                    single_num = check_data_type(module_config_buf[ii].data_type);
+                    single_num = check_data_type(g_module_config[ii].data_type);
                     consecutive_sum = consecutive_sum + single_num;
-                    modbus_set_slave(ctx_rs485_1, module_config_buf[ii].slave_addr);
-                    rc = send_modbus_cmd(module_config_buf[ii].storage_type, ctx_rs485_1, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
+                    modbus_set_slave(ctx_rs485_1, g_module_config[ii].slave_addr);
+                    rc = send_modbus_cmd(g_module_config[ii].storage_type, ctx_rs485_1, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
                     data_offset = data_offset + consecutive_sum;
                     consecutive_sum = 0;
                     printf("485_1 consecutive 2\r\n");
@@ -322,19 +329,19 @@ int get_rs485_2(uint16_t *data)
 
     for(ii = 0; ii<module_config_buf_len; ii++)
     {
-        if(module_config_buf[ii].enabled_flag == enable && module_config_buf[ii].channel == CHANNEL_RS485_2 && module_config_buf[ii].module_type < 512)//当前是否使能且为RS4851
+        if(g_module_config[ii].enabled_flag == enable && g_module_config[ii].channel == CHANNEL_RS485_2 && g_module_config[ii].module_type < 512)//当前是否使能且为RS4851
         {
-            if((module_config_buf[ii+1].enabled_flag == enable) && (module_config_buf[ii+1].channel == CHANNEL_RS485_2))  //下一个是否使能且为RS4851
+            if((g_module_config[ii+1].enabled_flag == enable) && (g_module_config[ii+1].channel == CHANNEL_RS485_2))  //下一个是否使能且为RS4851
             {
-                if(module_config_buf[ii].slave_addr == module_config_buf[ii+1].slave_addr)
+                if(g_module_config[ii].slave_addr == g_module_config[ii+1].slave_addr)
                 {
                     if(check_addr_consecutive(ii))//计算地址是否连续
                     {
                         if(consecutive_sum == 0)//记录下首地址
                         {
-                            consecutive_addr_begin = module_config_buf[ii].data_addr;
+                            consecutive_addr_begin = g_module_config[ii].data_addr;
                         }
-                        single_num = check_data_type(module_config_buf[ii].data_type);
+                        single_num = check_data_type(g_module_config[ii].data_type);
                         consecutive_sum = consecutive_sum + single_num;
                         printf("485_2 RECORD\r\n");
                     }
@@ -342,18 +349,18 @@ int get_rs485_2(uint16_t *data)
                     {
                         if(consecutive_sum == 0)//如果跟下一个不连续且第一次进来 直接输出
                         {
-                            single_num = check_data_type(module_config_buf[ii].data_type);
-                            modbus_set_slave(ctx_rs485_2, module_config_buf[ii].slave_addr);
-                            rc = send_modbus_cmd(module_config_buf[ii].storage_type, ctx_rs485_2, module_config_buf[ii].data_addr, single_num, &data[data_offset]);
+                            single_num = check_data_type(g_module_config[ii].data_type);
+                            modbus_set_slave(ctx_rs485_2, g_module_config[ii].slave_addr);
+                            rc = send_modbus_cmd(g_module_config[ii].storage_type, ctx_rs485_2, g_module_config[ii].data_addr, single_num, &data[data_offset]);
                             data_offset = data_offset + single_num;
                             printf("485_2 SINGLE\r\n");
                         }
                         else
                         {
-                            single_num = check_data_type(module_config_buf[ii].data_type);
+                            single_num = check_data_type(g_module_config[ii].data_type);
                             consecutive_sum = consecutive_sum + single_num;
-                            modbus_set_slave(ctx_rs485_2, module_config_buf[ii].slave_addr);
-                            rc = send_modbus_cmd(module_config_buf[ii].storage_type, ctx_rs485_2, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
+                            modbus_set_slave(ctx_rs485_2, g_module_config[ii].slave_addr);
+                            rc = send_modbus_cmd(g_module_config[ii].storage_type, ctx_rs485_2, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
                             data_offset = data_offset + consecutive_sum;
                             consecutive_sum = 0;
                             printf("485_2 consecutive 1\r\n");
@@ -364,18 +371,18 @@ int get_rs485_2(uint16_t *data)
                 {
                     if(consecutive_sum == 0)
                     {
-                        single_num = check_data_type(module_config_buf[ii].data_type);
-                        modbus_set_slave(ctx_rs485_2, module_config_buf[ii].slave_addr);
-                        rc = send_modbus_cmd(module_config_buf[ii].storage_type, ctx_rs485_2, module_config_buf[ii].data_addr, single_num, &data[data_offset]);
+                        single_num = check_data_type(g_module_config[ii].data_type);
+                        modbus_set_slave(ctx_rs485_2, g_module_config[ii].slave_addr);
+                        rc = send_modbus_cmd(g_module_config[ii].storage_type, ctx_rs485_2, g_module_config[ii].data_addr, single_num, &data[data_offset]);
                         data_offset = data_offset + single_num;
                         printf("485_2 SALVE ADDR CHANGE\r\n");
                     }
                     else
                     {
-                        single_num = check_data_type(module_config_buf[ii].data_type);
+                        single_num = check_data_type(g_module_config[ii].data_type);
                         consecutive_sum = consecutive_sum + single_num;
-                        modbus_set_slave(ctx_rs485_2, module_config_buf[ii].slave_addr);
-                        rc = send_modbus_cmd(module_config_buf[ii].storage_type, ctx_rs485_2, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
+                        modbus_set_slave(ctx_rs485_2, g_module_config[ii].slave_addr);
+                        rc = send_modbus_cmd(g_module_config[ii].storage_type, ctx_rs485_2, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
                         data_offset = data_offset + consecutive_sum;
                         consecutive_sum = 0;
                         printf("485_2 consecutive 3\r\n");  
@@ -386,18 +393,18 @@ int get_rs485_2(uint16_t *data)
             {
                 if(consecutive_sum == 0)
                 {
-                    single_num = check_data_type(module_config_buf[ii].data_type);
-                    modbus_set_slave(ctx_rs485_2, module_config_buf[ii].slave_addr);
-                    rc = send_modbus_cmd(module_config_buf[ii].storage_type, ctx_rs485_2, module_config_buf[ii].data_addr, single_num, &data[data_offset]);
+                    single_num = check_data_type(g_module_config[ii].data_type);
+                    modbus_set_slave(ctx_rs485_2, g_module_config[ii].slave_addr);
+                    rc = send_modbus_cmd(g_module_config[ii].storage_type, ctx_rs485_2, g_module_config[ii].data_addr, single_num, &data[data_offset]);
                     data_offset = data_offset + single_num;
                     printf("485_2 ABC\r\n");
                 }
                 else
                 {
-                    single_num = check_data_type(module_config_buf[ii].data_type);
+                    single_num = check_data_type(g_module_config[ii].data_type);
                     consecutive_sum = consecutive_sum + single_num;
-                    modbus_set_slave(ctx_rs485_2, module_config_buf[ii].slave_addr);
-                    rc = send_modbus_cmd(module_config_buf[ii].storage_type, ctx_rs485_2, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
+                    modbus_set_slave(ctx_rs485_2, g_module_config[ii].slave_addr);
+                    rc = send_modbus_cmd(g_module_config[ii].storage_type, ctx_rs485_2, consecutive_addr_begin, consecutive_sum, &data[data_offset]);
                     data_offset = data_offset + consecutive_sum;
                     consecutive_sum = 0;
                     printf("485_2 consecutive 2\r\n");
@@ -418,7 +425,7 @@ void sig_handler(int signal)
     timeup_rs4852_flag = 1;
 }
 
-void timerTestInit(void)
+void Timer_485_Init(void)
 {
     signal(SIGALRM, sig_handler);
     
@@ -427,6 +434,11 @@ void timerTestInit(void)
     new_timer.it_value.tv_sec = 20;//10s后开始执行
     new_timer.it_value.tv_usec = 0;
     setitimer(ITIMER_REAL, &new_timer, NULL);
+}
+
+void Timer_485_Delete(void)
+{
+    //TODO
 }
 
 void *RS485_1_TASK_entry(void *param)
@@ -476,12 +488,42 @@ void *RS485_2_TASK_entry(void *param)
 
 void RS485_1_TASK_Init(void)
  {
-    pthread_t rs485_1_task;
     pthread_create(&rs485_1_task, NULL, RS485_1_TASK_entry, NULL);
  }
 
 void RS485_2_TASK_Init(void)
  {
-    pthread_t rs485_2_task;
     pthread_create(&rs485_2_task, NULL, RS485_2_TASK_entry, NULL);
  }
+
+void RS485_1_TASK_Delete(void)
+ {
+    pthread_cancel(rs485_1_task);
+ }
+
+ void RS485_2_TASK_Delete(void)
+ {
+    pthread_cancel(rs485_2_task);
+ }
+
+void RS485_INIT(void)
+{
+    rs485_1_Init();
+    rs485_2_Init();
+    Timer_485_Init();
+    if(RS485_1_ENABLE_FLAG == 1)
+    {
+        RS485_1_TASK_Init();
+    }
+    if(RS485_2_ENABLE_FLAG == 1)
+    {
+       RS485_2_TASK_Init();
+    }
+}
+
+void RS485_DELETE(void)
+{
+    // Timer_485_Delete();
+    RS485_1_TASK_Delete();
+    RS485_2_TASK_Delete();
+}
