@@ -9,7 +9,7 @@
  *
  */
 #include "device.h"
-#include "CFG_Init.h"
+
 #include "string.h"
 #include <stdlib.h>
 #include "stdio.h"
@@ -318,6 +318,58 @@ int get_rs485_1(uint16_t *data)
     return 0;
 }
 
+int set_rs485_1(module_config_t *module_config, uint8_t *data)
+{
+    uint16_t databuf[2] = {0x0000, 0x0000};
+    if(module_config->enabled_flag == enable && module_config->channel == CHANNEL_RS485_1)
+    {
+        modbus_set_slave(ctx_rs485_1, module_config->slave_addr);
+        if(module_config->data_type == DTAT_TYPE_U8 && module_config->storage_type == 1)
+        {
+            modbus_write_bit(ctx_rs485_1, module_config->data_addr, (int)data[0]);
+        }
+        else if(module_config->data_type == DTAT_TYPE_U16_AB)
+        {
+            modbus_write_register(ctx_rs485_1, module_config->data_addr, data[0]<<8 | data[1]);
+        }
+        else if(module_config->data_type == DTAT_TYPE_U16_BA)
+        {
+            modbus_write_register(ctx_rs485_1, module_config->data_addr, data[1]<<8 | data[0]);
+        }
+        else if(module_config->data_type == DTAT_TYPE_U32_ABCD)
+        {
+            databuf[0] = data[0]<<8 | data[1];
+            databuf[1] = data[2]<<8 | data[3];
+            modbus_write_registers(ctx_rs485_1, module_config->data_addr, 2, databuf);
+        }
+        else if(module_config->data_type == DTAT_TYPE_U32_CDAB)
+        {    
+            databuf[0] = data[2]<<8 | data[3];
+            databuf[1] = data[1]<<8 | data[0];
+            modbus_write_registers(ctx_rs485_1, module_config->data_addr, 2, databuf);
+        }
+        else if(module_config->data_type == DTAT_TYPE_U32_BADC)
+        {
+            databuf[0] = data[1]<<8 | data[0];
+            databuf[1] = data[3]<<8 | data[2];
+            modbus_write_registers(ctx_rs485_1, module_config->data_addr, 2, databuf);
+        }
+        else if(module_config->data_type == DTAT_TYPE_U32_DCBA)
+        {    
+            databuf[0] = data[3]<<8 | data[2];
+            databuf[1] = data[1]<<8 | data[0];
+            modbus_write_registers(ctx_rs485_1, module_config->data_addr, 2, databuf);
+        }
+        else
+        {
+            databuf[0] = data[0]<<8 | data[1];
+            databuf[1] = data[2]<<8 | data[3];
+            modbus_write_registers(ctx_rs485_1, module_config->data_addr, 2, databuf);
+        }
+    }
+    return 0;
+}
+
 int get_rs485_2(uint16_t *data)
 {
     int ii = 0;
@@ -415,6 +467,57 @@ int get_rs485_2(uint16_t *data)
     return 0;
 }
 
+int set_rs485_2(module_config_t *module_config, uint8_t *data)
+{
+    uint16_t databuf[2] = {0x0000, 0x0000};
+    if(module_config->enabled_flag == enable && module_config->channel == CHANNEL_RS485_2)
+    {
+        modbus_set_slave(ctx_rs485_2, module_config->slave_addr);
+        if(module_config->data_type == DTAT_TYPE_U8)
+        {
+            modbus_write_bit(ctx_rs485_2, module_config->data_addr, (int)data[0]);
+        }
+        else if(module_config->data_type == DTAT_TYPE_U16_AB)
+        {
+            modbus_write_register(ctx_rs485_2, module_config->data_addr, data[0]<<8 | data[1]);
+        }
+        else if(module_config->data_type == DTAT_TYPE_U16_BA)
+        {
+            modbus_write_register(ctx_rs485_2, module_config->data_addr, data[1]<<8 | data[0]);
+        }
+        else if(module_config->data_type == DTAT_TYPE_U32_ABCD)
+        {
+            databuf[0] = data[0]<<8 | data[1];
+            databuf[1] = data[2]<<8 | data[3];
+            modbus_write_registers(ctx_rs485_2, module_config->data_addr, 2, databuf);
+        }
+        else if(module_config->data_type == DTAT_TYPE_U32_CDAB)
+        {    
+            databuf[0] = data[2]<<8 | data[3];
+            databuf[1] = data[1]<<8 | data[0];
+            modbus_write_registers(ctx_rs485_2, module_config->data_addr, 2, databuf);
+        }
+        else if(module_config->data_type == DTAT_TYPE_U32_BADC)
+        {
+            databuf[0] = data[1]<<8 | data[0];
+            databuf[1] = data[3]<<8 | data[2];
+            modbus_write_registers(ctx_rs485_2, module_config->data_addr, 2, databuf);
+        }
+        else if(module_config->data_type == DTAT_TYPE_U32_DCBA)
+        {    
+            databuf[0] = data[3]<<8 | data[2];
+            databuf[1] = data[1]<<8 | data[0];
+            modbus_write_registers(ctx_rs485_2, module_config->data_addr, 2, databuf);
+        }
+        else
+        {
+            databuf[0] = data[0]<<8 | data[1];
+            databuf[1] = data[2]<<8 | data[3];
+            modbus_write_registers(ctx_rs485_2, module_config->data_addr, 2, databuf);
+        }
+    }
+    return 0;
+}
 
 /*闹钟信号处理函数*/
 int timeup_rs4851_flag = 0;
@@ -441,6 +544,7 @@ void Timer_485_Delete(void)
     //TODO
 }
 
+// uint8_t setsetbuf[4] = {0x01, 0x36, 0x37, 0x38};
 void *RS485_1_TASK_entry(void *param)
  {
     while (1) 
@@ -453,12 +557,14 @@ void *RS485_1_TASK_entry(void *param)
             memset(rs485_1_Databuf, 0x00, sizeof(rs485_1_Databuf));
             get_rs485_1(rs485_1_Databuf);
             printf("rs485_1 read done \n");
-            for (i = 0; i < 14; ++i)
+            for (i = 0; i < 16; ++i)
             {
                 printf("<%#x>", rs485_1_Databuf[i]);
             }
             printf("\n");
             printf("rs485_1 print done \n");
+            // set_rs485_1(&g_module_config[11], setsetbuf);
+            // printf("rs485_1 SET done \n");
         }
     }
  }

@@ -113,8 +113,14 @@ void get_module_config(module_config_t *module_config)
         if(json_tmp != NULL && json_tmp->type  != cJSON_NULL)
         {
             module_config[ii].device_type = json_tmp->valueint;
-            printf("%d \r\n",module_config[ii].device_type);
+            printf("%d  ",module_config[ii].device_type);
         }
+		json_tmp = cJSON_GetObjectItem(MODULE_item, "data_index");
+		if (json_tmp != NULL && json_tmp->type != cJSON_NULL)
+		{
+			module_config[ii].data_index = json_tmp->valueint;
+			printf("%d \r\n", module_config[ii].data_index);
+		}
 		MODULE_item = MODULE_item ->next;
 	}
 	cJSON_Delete(cjson_config);//清除结构体
@@ -147,6 +153,7 @@ void  set_module_config(module_config_t *module_config)
 		cJSON_AddNumberToObject(MODULE_LIST, "data_addr", module_config[ii].data_addr);
         cJSON_AddStringToObject(MODULE_LIST, "device_sn", module_config[ii].device_sn);
         cJSON_AddNumberToObject(MODULE_LIST, "device_type", module_config[ii].device_type);
+		cJSON_AddNumberToObject(MODULE_LIST, "data_index", module_config[ii].data_index);
 		cJSON_AddItemToArray(MODULE, MODULE_LIST);
 	}
 

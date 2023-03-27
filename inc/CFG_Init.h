@@ -2,7 +2,7 @@
  * @Author: laoweijie laoweijie@cyg.com
  * @Date: 2023-03-20 13:10:09
  * @LastEditors: laoweijie laoweijie@cyg.com
- * @LastEditTime: 2023-03-24 14:55:08
+ * @LastEditTime: 2023-03-27 13:31:34
  * @FilePath: /modbusTest/inc/CFG_Init.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -36,6 +36,7 @@ typedef struct
 	int data_addr;
 	char device_sn[32];
 	int device_type;
+	int data_index;     // 数据存放位置 从0开始
 }module_config_t;
 
 typedef struct

@@ -2,7 +2,7 @@
  * @Author: laoweijie laoweijie@cyg.com
  * @Date: 2023-03-24 13:16:22
  * @LastEditors: laoweijie laoweijie@cyg.com
- * @LastEditTime: 2023-03-24 14:14:52
+ * @LastEditTime: 2023-03-27 13:53:38
  * @FilePath: /acu/inc/device.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -21,6 +21,7 @@
 
 #include "stdint.h"
 #include <stdio.h>
+#include "CFG_Init.h"
 #include "modbus.h"
 #include <pthread.h>
 
@@ -46,11 +47,11 @@
 int rs485_1_Init(void);
 int rs485_2_Init(void);
 
-int get_AI(uint8_t*);
-int get_DI(uint8_t*);
-int get_DO(uint8_t*);
+
 int get_rs485_1(uint16_t *data);
+int set_rs485_1(module_config_t *module_config, uint8_t *data);
 int get_rs485_2(uint16_t *data);
+int set_rs485_2(module_config_t *module_config, uint8_t *data);
 int GetNowTime(char *);
 
 int check_data_type (int check);
