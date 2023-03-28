@@ -70,6 +70,8 @@ MODBUS_BEGIN_DECLS
 #define MODBUS_FC_WRITE_MULTIPLE_COILS     0x0F
 #define MODBUS_FC_WRITE_MULTIPLE_REGISTERS 0x10
 #define MODBUS_FC_REPORT_SLAVE_ID          0x11
+#define MODBUS_FC_READ_FILE_RECORD         0x14
+#define MODBUS_FC_WRITE_FILE_RECORD        0x15
 #define MODBUS_FC_MASK_WRITE_REGISTER      0x16
 #define MODBUS_FC_WRITE_AND_READ_REGISTERS 0x17
 
@@ -236,6 +238,21 @@ MODBUS_API int modbus_write_and_read_registers(modbus_t *ctx,
                                                int read_addr,
                                                int read_nb,
                                                uint16_t *dest);
+
+//fileNumber  文件名
+//startRecordNumber   起始文件记录号
+//fileData    需要写入文件的数据
+//length      写入文件的数据长度
+MODBUS_API int modbus_write_file_record(modbus_t *ctx, uint16_t fileNumber, uint16_t startRecordNumber,
+                                        const uint16_t *fileData, uint8_t length);
+
+//fileNumber   文件名
+//startRecordNumber  起始文件记录号
+//length    需要读取文件数据的长度
+//dest      读取到的文件数据存放目标
+MODBUS_API int modbus_read_file_record(modbus_t *ctx, uint16_t fileNumber, uint16_t startRecordNumber,
+                                       uint16_t length, uint16_t *dest);
+
 MODBUS_API int modbus_report_slave_id(modbus_t *ctx, int max_dest, uint8_t *dest);
 
 MODBUS_API modbus_mapping_t *

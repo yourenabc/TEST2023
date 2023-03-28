@@ -232,7 +232,7 @@ int get_rs485_1(uint16_t *data)
 
     for(ii = 0; ii<module_config_buf_len; ii++)
     {
-        if(g_module_config[ii].enabled_flag == enable && g_module_config[ii].channel == CHANNEL_RS485_1 && g_module_config[ii].module_type < 512)//当前是否使能且为RS4851
+        if(g_module_config[ii].enabled_flag == enable && g_module_config[ii].channel == CHANNEL_RS485_1 && g_module_config[ii].module_type < 512 )//当前是否使能且为RS4851
         {
             if((g_module_config[ii+1].enabled_flag == enable) && (g_module_config[ii+1].channel == CHANNEL_RS485_1))  //下一个是否使能且为RS4851
             {
@@ -473,7 +473,7 @@ int set_rs485_2(module_config_t *module_config, uint8_t *data)
     if(module_config->enabled_flag == enable && module_config->channel == CHANNEL_RS485_2)
     {
         modbus_set_slave(ctx_rs485_2, module_config->slave_addr);
-        if(module_config->data_type == DTAT_TYPE_U8)
+        if(module_config->data_type == DTAT_TYPE_U8 && module_config->storage_type == 1)
         {
             modbus_write_bit(ctx_rs485_2, module_config->data_addr, (int)data[0]);
         }
@@ -544,7 +544,9 @@ void Timer_485_Delete(void)
     //TODO
 }
 
-// uint8_t setsetbuf[4] = {0x01, 0x36, 0x37, 0x38};
+// uint8_t setsetbuf[4] = {0x35, 0x36, 0x37, 0x38};
+// uint8_t setset2buf[4] = {0x31, 0x32, 0x33, 0x34};
+// int toggleflag = 0;
 void *RS485_1_TASK_entry(void *param)
  {
     while (1) 
@@ -556,6 +558,7 @@ void *RS485_1_TASK_entry(void *param)
             int i = 0;
             memset(rs485_1_Databuf, 0x00, sizeof(rs485_1_Databuf));
             get_rs485_1(rs485_1_Databuf);
+
             printf("rs485_1 read done \n");
             for (i = 0; i < 16; ++i)
             {
@@ -563,8 +566,18 @@ void *RS485_1_TASK_entry(void *param)
             }
             printf("\n");
             printf("rs485_1 print done \n");
-            // set_rs485_1(&g_module_config[11], setsetbuf);
-            // printf("rs485_1 SET done \n");
+            // if(toggleflag == 0)
+            // {
+            //     toggleflag = 1;
+            //     set_rs485_1(&g_module_config[10], setsetbuf);
+            //     printf("rs485_1 SET on done \n");
+            // }
+            // else if(toggleflag == 1)
+            // {
+            //     toggleflag = 0;
+            //     set_rs485_1(&g_module_config[10], setset2buf);
+            //     printf("rs485_1 SET off done \n");
+            // }
         }
     }
  }
