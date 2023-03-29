@@ -3,6 +3,7 @@
         "string.h": "c",
         "modbus-rtu.h": "c",
         "device.h": "c",
-        "cfg_init.h": "c"
+        "cfg_init.h": "c",
+        "particaldischarge_file.h": "c"
     }
 }
