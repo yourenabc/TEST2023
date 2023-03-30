@@ -549,18 +549,6 @@ void Timer_485_Delete(void)
 // uint8_t setsetbuf[4] = {0x35, 0x36, 0x37, 0x38};
 // uint8_t setset2buf[4] = {0x31, 0x32, 0x33, 0x34};
 // int toggleflag = 0;
-// int abc = 1;
-// uint16_t testbufbuf [100] = {0xA600, 0xE101, 0xB002, 0xBA01, 0xB604, 0x9401, 0x9F06, 0x6D01, 0xAC08, 0x4701,
-//                              0xAA0A, 0x1F01, 0xA80B, 0xF901, 0xB00D, 0xD201, 0xA40F, 0xAC01, 0xB011, 0x8601,
-//                              0xB613, 0x5F01, 0xBE15, 0x3901, 0xB017, 0x1301, 0xB018, 0xED01, 0xAA1A, 0xC601,
-//                              0xAC1C, 0x9F01, 0xA81E, 0x7901, 0xAC20, 0x5201, 0xAC22, 0x2B01, 0xAE24, 0x0401,
-//                              0xAE25, 0xDE01, 0xAE27, 0xB701, 0xAE29, 0x9001, 0xB82B, 0x6A01, 0xB42D, 0x4301,
-//                              0xA82F, 0x1D01, 0xA830, 0xF601, 0xA032, 0xD001, 0xAA34, 0xAA01, 0xA036, 0x8301,
-//                              0xBA38, 0x5D01, 0xAC3A, 0x3701, 0xA03C, 0x1001, 0xA63D, 0xEA01, 0xB03F, 0xC301,
-//                              0x9B41, 0x9D01, 0x9B43, 0x7601, 0xA045, 0x4F01, 0xAE47, 0x2801, 0xA849, 0x0201,
-//                              0xAE4A, 0xDB01, 0xAA4C, 0xB501, 0xA04E, 0x8E01, 0xB050, 0x6801, 0xAA52, 0x4101,
-//                              0xAE54, 0x1B01, 0xAC55, 0xF401, 0x9B57, 0xCD01, 0xAE59, 0xA701, 0xA65B, 0x8101};
-
 void *RS485_1_TASK_entry(void *param)
  {
     while (1) 
@@ -592,19 +580,8 @@ void *RS485_1_TASK_entry(void *param)
             //     set_rs485_1(&g_module_config[10], setset2buf);
             //     printf("rs485_1 SET off done \n");
             // }
-
-            // if(abc == 1)
-            // {
-            //     abc = 0;
-            //     for(i=0; i<100; i++)
-            //     {
-            //         channel_1_prpdBuf[i].amplitude = 0;
-            //         channel_1_prpdBuf[i].amplitude = 0;
-            //     }
-            //     // analysis_pd_data_prpd(testbufbuf, channel_1_prpdBuf, 100);
-            //     // analysis_pd_data_prps(testbufbuf, channel_1_prpsBuf, 100);
-            //     // printf("analysis done \n");
-            // }
+            
+            PD_testPro();
         }
     }
  }
