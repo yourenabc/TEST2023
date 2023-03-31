@@ -13,6 +13,9 @@ prps_t ch1_prps_analysisBuf[PD_ANALYSIS_DATA_LEN];//通道1的计算后的存放
 prps_t ch2_prps_analysisBuf[PD_ANALYSIS_DATA_LEN];//通道2的计算后的存放BUF PRPS
 prps_t ch3_prps_analysisBuf[PD_ANALYSIS_DATA_LEN];//通道2的计算后的存放BUF PRPS
 
+pthread_t pdFile_read_task;
+
+
 int read_pd_file_data(modbus_t *ctx, uint16_t fileNum, uint16_t startRecordNum, uint16_t len, uint16_t *desBuf)
 {
     if(len <= 0x7b)
@@ -121,7 +124,6 @@ int prps_analysis_buf_clear(prps_t *desdata)
     return 1;
 }
 
-int abc = 1;
 uint16_t testbufbuf [100] = {0xA600, 0xE101, 0xB002, 0xBA01, 0xB604, 0x9401, 0x9F06, 0x6D01, 0xAC08, 0x4701,
                              0xAA0A, 0x1F01, 0xA80B, 0xF901, 0xB00D, 0xD201, 0xA40F, 0xAC01, 0xB011, 0x8601,
                              0xB613, 0x5F01, 0xBE15, 0x3901, 0xB017, 0x1301, 0xB018, 0xED01, 0xAA1A, 0xC601,
@@ -133,16 +135,53 @@ uint16_t testbufbuf [100] = {0xA600, 0xE101, 0xB002, 0xBA01, 0xB604, 0x9401, 0x9
                              0xAE4A, 0xDB01, 0xAA4C, 0xB501, 0xA04E, 0x8E01, 0xB050, 0x6801, 0xAA52, 0x4101,
                              0xAE54, 0x1B01, 0xAC55, 0xF401, 0x9B57, 0xCD01, 0xAE59, 0xA701, 0xA65B, 0x8101};
 
-void PD_testPro(void)
+void PD_Pro(void)
 {
-    if(abc == 1)
-    {
-        abc = 0;
-        prpd_analysis_buf_clear(ch1_prpd_analysisBuf);
-        prps_analysis_buf_clear(ch1_prps_analysisBuf);
-        analysis_pd_data_prpd(PDPR_CH1_FILE, testbufbuf, ch1_prpd_analysisBuf, 100);
-        analysis_pd_data_prps(PDPS_CH1_FILE, testbufbuf, ch1_prps_analysisBuf, 100);
-        printf("analysis done \n");
-    }
+    //读取数据
+    // read_pd_file_data(ctx_rs485_2, 1, 0, 100, ch1_PD_data);
+    // read_pd_file_data(ctx_rs485_2, 2, 0, 100, ch2_PD_data);
+    // read_pd_file_data(ctx_rs485_2, 3, 0, 100, ch3_PD_data);
+
+
+    //清理缓存
+    prpd_analysis_buf_clear(ch1_prpd_analysisBuf);
+    prps_analysis_buf_clear(ch1_prps_analysisBuf);
+    // prpd_analysis_buf_clear(ch2_prpd_analysisBuf);
+    // prps_analysis_buf_clear(ch2_prps_analysisBuf);
+    // prpd_analysis_buf_clear(ch3_prpd_analysisBuf);
+    // prps_analysis_buf_clear(ch3_prps_analysisBuf);
+
+    //解析计算
+    analysis_pd_data_prpd(PDPR_CH1_FILE, testbufbuf, ch1_prpd_analysisBuf, 100);
+    analysis_pd_data_prps(PDPS_CH1_FILE, testbufbuf, ch1_prps_analysisBuf, 100);
+
+    // analysis_pd_data_prpd(PDPR_CH1_FILE, ch1_PD_data, ch1_prpd_analysisBuf, 100);
+    // analysis_pd_data_prps(PDPS_CH1_FILE, ch1_PD_data, ch1_prps_analysisBuf, 100);
+    // analysis_pd_data_prpd(PDPR_CH2_FILE, ch2_PD_data, ch2_prpd_analysisBuf, 100);
+    // analysis_pd_data_prps(PDPS_CH2_FILE, ch2_PD_data, ch2_prps_analysisBuf, 100);
+    // analysis_pd_data_prpd(PDPR_CH3_FILE, ch3_PD_data, ch3_prpd_analysisBuf, 100);
+    // analysis_pd_data_prps(PDPS_CH3_FILE, ch3_PD_data, ch3_prps_analysisBuf, 100);
+
+    printf("analysis done \n");
+
 }
 
+int pd_Cnt = 0;
+void *PD_FILE_TASK_entry(void *param)
+ {
+    while (1) 
+    {
+        usleep(500000);
+        pd_Cnt++;
+        if(pd_Cnt >= 100)//0.5s *200 = 100s
+        {
+            pd_Cnt = 0;
+            PD_Pro();
+        }
+    }
+ }
+
+void PD_FILE_TASK_Init(void)
+ {
+    pthread_create(&pdFile_read_task, NULL, PD_FILE_TASK_entry, NULL);
+ }

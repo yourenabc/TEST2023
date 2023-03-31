@@ -2,7 +2,7 @@
  * @Author: laoweijie laoweijie@cyg.com
  * @Date: 2023-03-29 08:54:53
  * @LastEditors: laoweijie laoweijie@cyg.com
- * @LastEditTime: 2023-03-30 14:36:35
+ * @LastEditTime: 2023-03-31 09:34:52
  * @FilePath: /modbusTest/inc/particalDischarge_file.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -16,19 +16,20 @@
 #include "device.h"
 #include "modbus.h"
 #include "file_port.h"
+#include <pthread.h>
 
 #define PhaseStacking 1000   //相位叠加系数
 
 #define  PD_DATA_LEN   2048
 #define  PD_ANALYSIS_DATA_LEN   100
 
-#define PDPR_CH1_FILE   "../acu/pdpr_channel1.txt"
-#define PDPR_CH2_FILE   "../acu/pdpr_channel2.txt"
-#define PDPR_CH3_FILE   "../acu/pdpr_channel2.txt"
+#define PDPR_CH1_FILE   "../acu/pdpr_channel1.dat"
+#define PDPR_CH2_FILE   "../acu/pdpr_channel2.dat"
+#define PDPR_CH3_FILE   "../acu/pdpr_channel3.dat"
 
-#define PDPS_CH1_FILE   "../acu/pdps_channel1.txt"
-#define PDPS_CH2_FILE   "../acu/pdps_channel2.txt"
-#define PDPS_CH3_FILE   "../acu/pdps_channel2.txt"
+#define PDPS_CH1_FILE   "../acu/pdps_channel1.dat"
+#define PDPS_CH2_FILE   "../acu/pdps_channel2.dat"
+#define PDPS_CH3_FILE   "../acu/pdps_channel3.dat"
 
 
 extern uint16_t ch1_PD_data[];
@@ -64,7 +65,9 @@ int analysis_pd_data_prps(char *filename, uint16_t *srcdata, prps_t *desdata, in
 int prpd_analysis_buf_clear(prpd_t *desdata);
 int prps_analysis_buf_clear(prps_t *desdata);
 
-void PD_testPro(void);
+void PD_Pro(void);
+void *PD_FILE_TASK_entry(void *param);
+void PD_FILE_TASK_Init(void);
 
 #endif
 

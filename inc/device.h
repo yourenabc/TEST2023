@@ -2,7 +2,7 @@
  * @Author: laoweijie laoweijie@cyg.com
  * @Date: 2023-03-24 13:16:22
  * @LastEditors: laoweijie laoweijie@cyg.com
- * @LastEditTime: 2023-03-27 13:53:38
+ * @LastEditTime: 2023-03-31 09:06:14
  * @FilePath: /acu/inc/device.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -43,6 +43,8 @@
 #define DTAT_TYPE_FLOAT_BADC 10
 #define DTAT_TYPE_FLOAT_DCBA 11
 
+extern modbus_t *ctx_rs485_1;
+extern modbus_t *ctx_rs485_2;
 
 int rs485_1_Init(void);
 int rs485_2_Init(void);

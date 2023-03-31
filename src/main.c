@@ -2,7 +2,7 @@
  * @Author: laoweijie laoweijie@cyg.com
  * @Date: 2023-03-20 13:10:10
  * @LastEditors: laoweijie laoweijie@cyg.com
- * @LastEditTime: 2023-03-24 15:03:31
+ * @LastEditTime: 2023-03-31 09:01:48
  * @FilePath: /modbusTest/src/main.c
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AEs
  */
@@ -10,7 +10,7 @@
 #include "CFG_Init.h"
 #include "modbus.h"
 #include "device.h"
-
+#include "particalDischarge_file.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -38,19 +38,22 @@ int main()
     if(RS485_1_ENABLE_FLAG == 1)
     {
         RS485_1_TASK_Init();
+    } 
+    else if(RS485_1_ENABLE_FLAG == 0)
+    {
+        printf("rs485_1 not found \n");
     }
+
     if(RS485_2_ENABLE_FLAG == 1)
     {
        RS485_2_TASK_Init();
     }
-    if(RS485_1_ENABLE_FLAG == 0)
-    {
-        printf("rs485_1 not found \n");
-    }
-    if(RS485_2_ENABLE_FLAG == 0)
+    else if(RS485_2_ENABLE_FLAG == 0)
     {
         printf("rs485_2 not found \n");
     }
+
+    PD_FILE_TASK_Init();
 
 	while(1)
     {

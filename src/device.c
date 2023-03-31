@@ -15,7 +15,6 @@
 #include "stdio.h"
 #include <signal.h>
 #include <sys/time.h>
-
 #include "particalDischarge_file.h"
 
 #define RS485_1_USB "/dev/ttyUSB0"
@@ -580,8 +579,6 @@ void *RS485_1_TASK_entry(void *param)
             //     set_rs485_1(&g_module_config[10], setset2buf);
             //     printf("rs485_1 SET off done \n");
             // }
-            
-            PD_testPro();
         }
     }
  }
